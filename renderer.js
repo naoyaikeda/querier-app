@@ -1,4 +1,4 @@
-const searchInput = document.getElementById('searchInput');
+const catalogSelect = document.getElementById('catalogSelect');
 const tagSelect = document.getElementById('tagSelect');
 const searchBtn = document.getElementById('searchBtn');
 const resultsGrid = document.getElementById('resultsGrid');
@@ -6,9 +6,24 @@ const imageModal = document.getElementById('imageModal');
 const modalImg = imageModal.querySelector('img');
 const modalClose = imageModal.querySelector('.modal-close');
 
+// Load Catalogs
+async function loadCatalogs() {
+    const { catalogs, current } = await window.api.getCatalogs();
+    catalogSelect.innerHTML = '';
+    catalogs.forEach(name => {
+        const option = document.createElement('option');
+        option.value = name;
+        option.textContent = name;
+        if (name === current) option.selected = true;
+        catalogSelect.appendChild(option);
+    });
+}
+
 // Load Tags
 async function loadTags() {
     const tags = await window.api.getAllTags();
+    // Clear existing tags except the first one (All Tags)
+    tagSelect.innerHTML = '<option value="">All Tags</option>';
     tags.forEach(t => {
         const option = document.createElement('option');
         option.value = t.tag;
@@ -19,12 +34,11 @@ async function loadTags() {
 
 // Search
 async function performSearch() {
-    const query = searchInput.value;
     const tag = tagSelect.value;
     
     resultsGrid.innerHTML = '<p>Loading...</p>';
     
-    const results = await window.api.searchImages({ query, tag });
+    const results = await window.api.searchImages({ tag });
     
     resultsGrid.innerHTML = '';
     
@@ -33,7 +47,7 @@ async function performSearch() {
         return;
     }
     
-    if (results.length === 0) {
+    if (!results || results.length === 0) {
         resultsGrid.innerHTML = '<p>No results found.</p>';
         return;
     }
@@ -67,8 +81,16 @@ async function performSearch() {
 
 // Event Listeners
 searchBtn.addEventListener('click', performSearch);
-searchInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') performSearch();
+
+catalogSelect.addEventListener('change', async () => {
+    const name = catalogSelect.value;
+    const result = await window.api.switchCatalog(name);
+    if (result.success) {
+        await loadTags();
+        await performSearch();
+    } else {
+        alert('Failed to switch catalog: ' + result.error);
+    }
 });
 
 modalClose.addEventListener('click', () => {
@@ -84,5 +106,10 @@ imageModal.addEventListener('click', (e) => {
 });
 
 // Init
-loadTags();
-performSearch(); // Load initial
+async function init() {
+    await loadCatalogs();
+    await loadTags();
+    await performSearch();
+}
+
+init();
