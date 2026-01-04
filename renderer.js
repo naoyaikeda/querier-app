@@ -1,5 +1,7 @@
 const catalogSelect = document.getElementById('catalogSelect');
 const tagSelect = document.getElementById('tagSelect');
+const sortOrderSelect = document.getElementById('sortOrderSelect');
+const limitInput = document.getElementById('limitInput');
 const searchBtn = document.getElementById('searchBtn');
 const resultsGrid = document.getElementById('resultsGrid');
 const imageModal = document.getElementById('imageModal');
@@ -35,10 +37,12 @@ async function loadTags() {
 // Search
 async function performSearch() {
     const tag = tagSelect.value;
+    const sortOrder = sortOrderSelect.value;
+    const limit = parseInt(limitInput.value, 10);
     
     resultsGrid.innerHTML = '<p>Loading...</p>';
     
-    const results = await window.api.searchImages({ tag });
+    const results = await window.api.searchImages({ tag, sortOrder, limit });
     
     resultsGrid.innerHTML = '';
     

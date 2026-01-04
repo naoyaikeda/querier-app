@@ -153,7 +153,7 @@ app.on('window-all-closed', function () {
 });
 
 // IPC Handlers
-ipcMain.handle('search-images', (event, { tag }) => {
+ipcMain.handle('search-images', (event, { tag, sortOrder, limit }) => {
   if (!db) return { error: 'Database not initialized' };
 
   try {
@@ -183,7 +183,13 @@ ipcMain.handle('search-images', (event, { tag }) => {
       sql += ' WHERE ' + conditions.join(' AND ');
     }
 
-    sql += ' GROUP BY i.id ORDER BY i.created_at DESC LIMIT 100';
+    // Validate inputs
+    const order = (sortOrder === 'ASC') ? 'ASC' : 'DESC';
+    let limitVal = parseInt(limit, 10);
+    if (isNaN(limitVal) || limitVal < 1) limitVal = 100;
+
+    sql += ` GROUP BY i.id ORDER BY i.created_at ${order} LIMIT ?`;
+    params.push(limitVal);
 
     const stmt = db.prepare(sql);
     const rows = stmt.all(...params);

@@ -7,6 +7,7 @@ Designed to browse and search images stored in a specific vault structure with s
 
 - **Local Image Search**: Search images by filename.
 - **Tag Filtering**: Filter images by associated tags.
+- **Sorting & Limits**: Sort results by date (Newest/Oldest) and control the number of displayed items.
 - **Fast Viewing**: Grid view with thumbnails and full-size preview modal.
 - **Secure File Access**: Uses custom `local-resource://` protocol to safely serve local files.
 
